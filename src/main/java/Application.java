@@ -16,7 +16,6 @@ import java.net.InetSocketAddress;
  */
 public class Application {
     public static void main(String[] args) throws IOException {
-        System.setProperty("jdk.httpserver.maxConnections","1000000");
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(8081),0);
         // 设置线程池以支持高并发
         httpServer.setExecutor(ExecutorManager.getExecutor());
@@ -26,7 +25,6 @@ public class Application {
         httpServer.createContext("/", new HomeworkHttpHandler());
         httpServer.start();
         System.out.println("Server started at http://localhost:8081");
-        System.out.println(System.getProperty("jdk.httpserver.maxConnections"));
     }
 
 }
