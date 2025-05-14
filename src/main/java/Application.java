@@ -16,7 +16,7 @@ import java.net.InetSocketAddress;
  */
 public class Application {
     public static void main(String[] args) throws IOException {
-        HttpServer httpServer = HttpServer.create(new InetSocketAddress(8081),0);
+        HttpServer httpServer = HttpServer.create(new InetSocketAddress(8080),0);
         // 设置线程池以支持高并发
         httpServer.setExecutor(ExecutorManager.getExecutor());
         // 注册控制器
@@ -24,7 +24,7 @@ public class Application {
         // 创建上下文并绑定处理器
         httpServer.createContext("/", new HomeworkHttpHandler());
         httpServer.start();
-        System.out.println("Server started at http://localhost:8081");
+        System.out.println("Server started at http://localhost:8080");
     }
 
 }

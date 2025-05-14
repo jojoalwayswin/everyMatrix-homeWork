@@ -1,5 +1,8 @@
 package utils;
 
+import domain.SessionEntry;
+import manager.SessionManager;
+
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
@@ -14,8 +17,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @version: 1.0
  */
 public class SessionLRUCache {
+    // 静态final实例保证唯一性
+    private static final SessionLRUCache INSTANCE = new SessionLRUCache();
+    public static SessionLRUCache getInstance() {
+        return INSTANCE;
+    }
     // use custom hashmap for quick lookup , the time complexity is O(1)
-    private final CustomHashMap<Integer, SessionNode> table = new CustomHashMap<>();
+    private final CustomHashMap<Integer, SessionNode> customerIdTable = new CustomHashMap<>();
+
+    private final CustomHashMap<Integer, SessionNode> sessionKeyTable = new CustomHashMap<>();
     // LRU 双向链表头尾哨兵节点
     private final SessionNode head = new SessionNode(-1, null);
     private final SessionNode tail = new SessionNode(-1, null);
@@ -35,15 +45,15 @@ public class SessionLRUCache {
         // try to read first
         lock.readLock().lock();
         try {
-            if (table.containsKey(customerId)) {
-                SessionNode node = table.get(customerId);
+            if (customerIdTable.containsKey(customerId)) {
+                SessionNode node = customerIdTable.get(customerId);
                 if (now - node.createTime <= expireTime) {
                     // moveToHead(node); // update least recently used
                     return node.sessionKey;
                 } else {
                     // if session expired,  remove it
                     removeNode(node);
-                    table.remove(customerId);
+                    customerIdTable.remove(customerId);
                 }
             }
         }finally {
@@ -57,7 +67,7 @@ public class SessionLRUCache {
             SessionNode newNode = new SessionNode(customerId, sessionKey);
 
             addAfterHead(newNode);
-            table.put(customerId, newNode);
+            customerIdTable.put(customerId, newNode);
             return sessionKey;
         } finally {
             lock.writeLock().unlock();
@@ -79,6 +89,11 @@ public class SessionLRUCache {
         head.next.prev = node;
         head.next = node;
     }
+
+    public Integer invalidateSession(String sessionKey) {
+      return 1;
+    }
+
     static class SessionNode {
         int customerId;
         String sessionKey;

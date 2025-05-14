@@ -11,7 +11,7 @@ import java.util.Random;
  */
 public class StakeSkipList{
     private Node head;
-    private int maxLevel;
+    private int maxLevel ;
     private Random random;
     private static final int MAX_LEVEL = 16;
     private static final double P = 0.5;
@@ -29,102 +29,100 @@ public class StakeSkipList{
         Node[] next;
         int level;
 
-        Node() {}
+        public Node() {}
+        public Node(int key, int value) {
+            this.key = key;
+            this.value = value;
+        }
         public int getKey() {
             return key;
         }
         public int getValue() {
             return value;
         }
+        public void setKey(int key) {
+            this.key = key;
+        }
+        public void setValue(int value) {
+            this.value = value;
+        }
+
     }
     private int randomLevel() {
         int level = 1;
-        while (random.nextDouble() < P && level < MAX_LEVEL) {
+        while (random.nextDouble() < P && level < maxLevel) {
             level++;
         }
         return level;
     }
-    public Node get(int key) {
-        Node current = head;
-
-        // 从最高层开始逐层向下搜索
-        for (int i = maxLevel - 1; i >= 0; i--) {
-            // 在当前层向右搜索，直到找到大于等于目标或到达末尾
-            while (current.next[i] != null) {
-                // 如果找到 key 匹配的节点直接返回
-                if (current.next[i].key == key) {
-                    return current.next[i];
-                }
-                // 如果下一节点的 value 仍大于当前 value，继续向右移动
-                if (current.next[i].value > Integer.MIN_VALUE) { // 假设 value 不会为最小值
-                    current = current.next[i];
-                } else {
-                    break;
-                }
-            }
-        }
-        // 最终检查底层链表
-        current = current.next[0];
-        return (current != null && current.key == key) ? current : null;
-    }
     public void put(int key, int value) {
+        Node current = head;
+        Node[] update = new Node[maxLevel];
 
-            // 2. 使用 maxLevel 初始化 update 数组（确保长度足够）
-            Node[] update = new Node[maxLevel]; // 关键修改：使用 newLevel 作为数组长度
-            Node current = head;
+        // 1. 查找每一层的插入位置
+        for (int i = maxLevel - 1; i >= 0; i--) {
+            while (current.next[i] != null && current.next[i].value > value) {
+                current = current.next[i];
+            }
+            update[i] = current;
+        }
 
-            // 3. 查找插入位置并检查 key 是否存在
-            boolean keyExists = false;
-            Node existNode = null;
-            for (int i = maxLevel - 1; i >= 0; i--) {
-                // 3.1 查找当前层的插入位置
-                while (current.next[i] != null && current.next[i].value > value) {
-                    current = current.next[i];
-                }
-                update[i] = current;
-                // 检查当前层是否已有相同 key
-                if (current.next[i] != null && current.next[i].key == key) {
-                    existNode = current.next[i];
-                    keyExists = true;
-                    break; // 找到即可退出
-                }
+        // 2. 随机生成层级
+        int newLevel = randomLevel();
+        if (newLevel > maxLevel) {
+            for (int i = maxLevel; i < newLevel && i < MAX_LEVEL; i++) {
+                update[i] = head;
             }
+            maxLevel = Math.min(newLevel, MAX_LEVEL);
+        }
 
-            // 4. 如果 key 已存在，先删除再插入新节点
-            if (keyExists) {
-                value += existNode.value;
-                delete(existNode, update); // 删除所有层级引用
-                put(key, value);
-                return;
-            }
-            int newLevel = randomLevel();
-            // 5. 填充新增层级的 update 指针（如果 newLevel 更大）
-            if (newLevel > maxLevel) {
-                for (int i = maxLevel; i < newLevel; i++) {
-                    update[i] = head;
-                }
-                maxLevel = newLevel;
-            }
-            // 6. 创建新节点并更新指针
-            Node node = new Node();
-            node.key = key;
-            node.value = value;
-            node.level = newLevel;
-            node.next = new Node[newLevel];
+        // 3. 创建新节点
+        Node node = new Node();
+        node.key = key;
+        node.value = value;
+        node.level = newLevel;
+        node.next = new Node[newLevel];
 
-            // 更新指针
-            for (int i = 0; i < newLevel; i++) {
-                node.next[i] = update[i].next[i];
-                update[i].next[i] = node;
-            }
-            return;
+        // 4. 插入到跳跃表中
+        for (int i = 0; i < newLevel; i++) {
+            node.next[i] = update[i].next[i];
+            update[i].next[i] = node;
+        }
 
     }
-    private void delete(Node node, Node[] update) {
-        for (int i = 0; i < node.level; i++) {
-            Node pred = update[i];
-            pred.next[i] = node.next[i];
+    public void deleteByKeyAndValue(Node targetNode) {
+        if (targetNode == null) return;
+
+        // 用于记录每一层的前驱节点
+        Node current = head;
+        Node[] update = new Node[maxLevel];
+
+        for (int i = maxLevel - 1; i >= 0; i--) {
+            while (current.next[i] != null &&
+                    (current.next[i].value > targetNode.value ||
+                            (current.next[i].value == targetNode.value && current.next[i].key < targetNode.key))) {
+                current = current.next[i];
+            }
+            update[i] = current;
         }
+
+        // 从底层开始检查是否有匹配的节点
+        current = update[0].next[0];
+        while (current != null) {
+            if (current.key == targetNode.key && current.value == targetNode.value) {
+                // 找到匹配节点，删除它在各层级中的引用
+                for (int i = 0; i < current.level; i++) {
+                    if (update[i].next[i] == current) {
+                        update[i].next[i] = current.next[i];
+                    }
+                }
+                // 继续查找下一个匹配节点（如果有）
+                current = current.next[0];
+            } else {
+                break;
+            }
+        }
+
         // 调整最大层级
         while (maxLevel > 1 && head.next[maxLevel - 1] == null) {
             maxLevel--;
