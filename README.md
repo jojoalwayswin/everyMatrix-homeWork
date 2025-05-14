@@ -9,7 +9,7 @@ THE everyMatrix-homeWork
 ### The Optimization of the original HttpServer architecture
 
 this project requires not use any framework,and we have to use com.sun. net.httpserver.HttpServer.
-This service requires the ability to handle a large number of simultaneous requests, so the io blocking feature of com. sun.net. httpserver.HttpServer clearly does not meet the requirements.
+this service requires the ability to handle a large number of simultaneous requests, so the io blocking feature of com. sun.net. httpserver.HttpServer clearly does not meet the requirements.
 We need to optimize the HttpServer architecture. 
 * Optimization point one:  use the setExecutor() method to set the thread pool to improve concurrency.
 * Optimization point two: in the handle method of the request, submit time-consuming operations to an asynchronous thread pool for execution, and the main thread can be quickly released.
@@ -31,7 +31,7 @@ When a request arrives at this service, we will find the corresponding request m
 
 ### Get a high stakes list for a betting offer
 * Firstly, check if the bidding offer ID exists in the map
-* find the customer and stamp map corresponding to the betofferid
+* find the customer and stake map corresponding to the betofferid
 * sort them in descending order based on stake
 * limited to 20 items
 * using the map method to output k=v format
