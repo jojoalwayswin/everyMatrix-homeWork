@@ -1,6 +1,6 @@
 package domain;
 
-import java.util.concurrent.ConcurrentHashMap;
+import utils.CustomHashMap;
 
 /**
  * @author zhangshu
@@ -10,6 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version: 1.0
  */
 public class Stake {
-    public static ConcurrentHashMap<Integer, ConcurrentHashMap<Integer,Integer>> stakeMap = new ConcurrentHashMap<>();
-
+    public static CustomHashMap<Integer, BetOffer> stakeMap = new CustomHashMap<>();
+    public static BetOffer getBetOffer(int betOfferId) {
+        return stakeMap.get(betOfferId);
+    }
 }
