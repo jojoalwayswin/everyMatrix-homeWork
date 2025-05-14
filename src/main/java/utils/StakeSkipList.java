@@ -68,15 +68,7 @@ public class StakeSkipList{
         return (current != null && current.key == key) ? current : null;
     }
     public void put(int key, int value) {
-        while(true) {
-            int newLevel = randomLevel();
-            // 1. 提前处理层级扩展
-            if (newLevel > maxLevel) {
-                Node[] newNext = new Node[newLevel];
-                System.arraycopy(head.next, 0, newNext, 0, maxLevel);
-                head.next = newNext;
-                maxLevel = newLevel;
-            }
+
             // 2. 使用 maxLevel 初始化 update 数组（确保长度足够）
             Node[] update = new Node[maxLevel]; // 关键修改：使用 newLevel 作为数组长度
             Node current = head;
@@ -102,7 +94,10 @@ public class StakeSkipList{
             if (keyExists) {
                 value += existNode.value;
                 delete(existNode, update); // 删除所有层级引用
+                put(key, value);
+                return;
             }
+            int newLevel = randomLevel();
             // 5. 填充新增层级的 update 指针（如果 newLevel 更大）
             if (newLevel > maxLevel) {
                 for (int i = maxLevel; i < newLevel; i++) {
@@ -123,14 +118,16 @@ public class StakeSkipList{
                 update[i].next[i] = node;
             }
             return;
-        }
+
     }
     private void delete(Node node, Node[] update) {
         for (int i = 0; i < node.level; i++) {
-            // 确保 update[i] 指向该层级的正确前驱节点
-            if (i < update.length && update[i] != null && update[i].next[i] == node) {
-                update[i].next[i] = node.next[i];
-            }
+            Node pred = update[i];
+            pred.next[i] = node.next[i];
+        }
+        // 调整最大层级
+        while (maxLevel > 1 && head.next[maxLevel - 1] == null) {
+            maxLevel--;
         }
     }
     public Node[] getTopN(int n) {
