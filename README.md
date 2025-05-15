@@ -1,5 +1,9 @@
 THE everyMatrix-homeWork 
 
+## 2025-05-15 VERSION 2 UPDATE
+* The SessionManager uses custom hash tables and doubly linked lists for quick session lookup and quick deletion of expired sessions
+* Stake uses a custom hash table to store different BetOffer. In BetOffer, a custom hash table is used to store Stakes for different users for quick lookup, and a custom skip list is used for sorting
+
 ## Run it 
 1. Clone the repo
 2. install jdk 24
@@ -30,9 +34,9 @@ When a request arrives at this service, we will find the corresponding request m
 * determine whether the session is legitimate,and only requests with valid session keys will be processed
 
 ### Get a high stakes list for a betting offer
-* Firstly, check if the bidding offer ID exists in the map
-* find the customer and stake map corresponding to the betofferid
-* sort them in descending order based on stake
-* limited to 20 items
-* using the map method to output k=v format
-* concatenate the output string with "," 
+* ~~Firstly, check if the bidding offer ID exists in the map~~
+* ~~find the customer and stake map corresponding to the betofferid~~
+* ~~sort them in descending order based on stake~~
+* ~~limited to 20 items~~
+* ~~using the map method to output k=v format~~
+* ~~concatenate the output string with ","~~ 

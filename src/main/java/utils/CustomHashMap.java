@@ -1,5 +1,9 @@
 package utils;
 
+import java.util.AbstractMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -11,8 +15,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @date 2025年05月13日
  * @version: 1.0
  */
-public class CustomHashMap <K,V>{
-    private static class Entry<K, V> {
+public class CustomHashMap <K,V> {
+    public static class Entry<K, V> {
         K key;
         V value;
         Entry<K, V> next;
@@ -20,6 +24,15 @@ public class CustomHashMap <K,V>{
         public Entry(K key, V value) {
             this.key = key;
             this.value = value;
+        }
+        public K getKey() {
+            return key;
+        }
+        public V getValue() {
+            return value;
+        }
+        public Entry<K, V> getNext() {
+            return next;
         }
     }
 
@@ -166,4 +179,5 @@ public class CustomHashMap <K,V>{
             }
         }
     }
+
 }
